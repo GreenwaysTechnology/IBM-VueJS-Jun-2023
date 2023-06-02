@@ -1,11 +1,9 @@
-<!-- Options Api Pattern -->
-<script>
-export  default{
+<script setup>
+import ProductMaster from './components/products/ProductMaster.vue';
 
-}
+
 </script>
 <template>
- <h1>Vue SFC Component Using Options Api</h1>
+    <h1>Props Pattern Using Options Api</h1>
+    <ProductMaster/>
 </template>
-<style>
-</style>

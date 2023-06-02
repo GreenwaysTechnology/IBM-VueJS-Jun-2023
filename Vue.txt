@@ -1163,4 +1163,1470 @@ In this pattern we write code directly inside script.
 				  |
 		----------------------------------------------------
 		|                                                  |
-	      with setup function                          with setup attribute				
+	      with setup function                          with setup attribute	
+
+With Setup function:
+...................
+1.Looks like Options api pattern but code refactoring done.
+2.It looks like imperative style of compostion apis.
+
+<!-- Compsition pattern with setup function -->
+<script>
+export default {
+    setup() {
+        //all js initalization code will go here
+    }
+}
+</script>
+<template>
+</template>
+<style>
+
+</style>
+
+With setup attribute:
+....................
+
+1.vue compiler writes all boiler plate code for us.
+
+<!-- Compsition pattern with setup attribute -->
+<script setup>
+// you can write app logic directly : which looks like regular js code
+</script>
+<template>
+    <h1>Single File Component with Composition api with setup attribute</h1>
+</template>
+<style>
+
+</style>
+
+
+ 				Vue App
+				   |
+			---------------------------------------  
+			With Build tool                  without build tool
+				 |				|
+			SFC Component            	 Script based (refer above)
+				   |
+	----------------------------------------------------------------
+        |                                                             |
+        |                                                             |
+
+      Options Api                                              Composition Api
+	 |                                                          |
+   Vue 2 based apps                                           Vue 3 based apps
+							        												|	
+		  							|
+				----------------------------------------------------
+				|                                       |
+	      	with setup function                           with setup attribute	
+
+....................................................................................
+
+Component with Options api:
+...........................
+<!-- Options api pattern -->
+<script>
+// Options Object : we have to return always options Object
+export default {
+   //js logic goes
+}
+</script>
+<template>
+ <h1>Options Api Demo</h1>
+</template>
+<style>
+
+</style>
+
+Component with compostion api : with setup function
+<script>
+export default {
+    setup() {
+
+    }
+}
+</script>
+<template>
+    <h1>Composition api with setup function</h1>
+</template>
+<style>
+
+</style>
+
+Composition with setup attribute:
+<script setup>
+
+</script>
+<template>
+    <h1>Composition api with setup Attribute</h1>
+</template>
+<style>
+
+</style>
+
+....................................................................................
+			Component Composition 
+
+Organization of Components in hierachical order(tree) pattern
+
+<div id="root">
+    <App>
+	<Hello></Hello>
+    </App>
+</div>
+
+eg:
+
+Component with "Options API"
+ 
+In this pattern, component must be registered inside script
+using component key
+
+src/components/greeter/Hello.vue
+<script>
+</script>
+<template>
+    <h2>Hello</h2>  
+</template>
+<style>
+</style>
+
+src/components/greeter/App.vue
+<script>
+import Hello from "./components/greeter/Hello.vue";
+
+export default {
+    components: { Hello }
+}
+</script>
+<template>
+    <div>
+        <h1>App</h1>
+        <Hello></Hello>
+    </div>
+</template>
+<style>
+
+</style>
+.................................................................................
+Component Registration with composition pattern with setup function:
+......................................................................
+<script>
+import Hello from "./components/greeter/Hello.vue";
+export default {
+    components: { Hello,Hai },
+    setup() {
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>App</h1>
+        <Hello></Hello>
+    </div>
+</template>
+<style>
+
+</style>
+.................................................................................	Component Registration with composition pattern with setup attribute:
+......................................................................
+<script setup>
+import Hello from "./components/greeter/Hello.vue";
+
+</script>
+<template>
+    <div>
+        <h1>App</h1>
+        <Hello></Hello>
+    </div>
+</template>
+<style>
+
+</style>
+....................................................................................
+
+Assigment-1:
+............
+Create Layout Components
+
+1.header
+   |
+   Logo
+   SearchPanel
+   LoginPanel
+2.main
+   |
+   three sections
+    -Vue features
+3.Footer
+   |
+   Sponors
+   copyright
+
+You have to try
+
+1.Options api
+2.Compositions api with imperative (setup fun) and declarative Patterns (setup attr)
+
+...................................................................................
+............................&&&&&&&&&&..............................................
+			    Component Registeration -Creations
+.....................................................................................
+
+A Vue component needs to be "registered" so that Vue knows where to locate its implmeneation when it is encountered in a template.
+
+Two Types of Registeration:
+
+1.Global Registeration
+  Global Components
+2.Local Registeration
+  Local Components
+
+Global Components:
+  Components are created and  registered as part of the application object
+  Global Components can be accessed any where in the application without explicit   configuration
+
+Application object having lot of methods
+app.component()
+app.use()
+app.provide()
+etc...
+https://vuejs.org/api/application.html#app-component
+
+import { createApp } from 'vue'
+
+const app = createApp({})
+
+// register an options object
+app.component('my-component', {
+  /* ... */
+})
+
+// retrieve a registered component
+const MyComponent = app.component('my-component')
+
+.....................................................................................
+eg:
+src/components/StatusBar.vue
+<script setup>
+</script>
+<template>
+    <h2>Status Bar!!</h2>
+</template>
+<style>
+</style>
+
+src/main.js
+
+import { createApp } from 'vue'
+import App from './App.vue'
+import StatusBar from './components/global/StatusBar.vue'
+import './assets/main.css'
+// console.log(App)
+
+const app = createApp(App)
+
+app.component('StatusBar', StatusBar)
+
+
+app.mount('#app')
+
+src/App.vue
+<script>
+import StatusBar from './components/global/StatusBar.vue';
+export default {
+    //components: { StatusBar }
+}
+
+</script>
+<template>
+    <StatusBar></StatusBar>
+</template>
+<style>
+</style>
+
+Without import also global components works:
+
+<!-- Compostion api pattern using setup attribute -->
+<script>
+import Hello from './components/greeter/Hello.vue'
+// import StatusBar from './components/global/StatusBar.vue'
+
+export default {
+    components: { Hello }
+}
+</script>
+<template>
+    <Hello></Hello>
+    <StatusBar></StatusBar>
+</template>
+
+
+
+Short cut inside main.js
+import { createApp } from 'vue'
+import App from './App.vue'
+import StatusBar from './components/global/StatusBar.vue'
+import './assets/main.css'
+// console.log(App)
+// const app = createApp(App)
+// app.component('StatusBar', StatusBar)
+// app.mount('#app')
+
+createApp(App)
+    .component('StatusBar', StatusBar)
+    .mount('#app')
+
+Note:
+ Here incase the component is part of application object(Global Component), we need not register with components using {components:CompName}
+....................................................................................
+
+			 Local Components Registration
+................................................................................
+
+Components are registered when the child component is created
+
+SFC using composition pattern using setup attribute:
+
+Greeter.vue
+<script setup>
+  import ComponentA from './ComponentA.vue'
+</script>
+
+<template>
+  <ComponentA />
+</template>
+
+SFC using composition pattern using without setup attribute:
+
+Greeter.vue
+<script setup>
+  import ComponentA from './ComponentA.vue'
+
+export default {
+   components: { 
+         ComponentsA
+   }
+}
+</script>
+
+<template>
+  <ComponentA />
+</template>
+
+..................................................................................
+			Both local and global compoents
+...................................................................................
+<script>
+import StatusBar from './components/global/StatusBar.vue';
+import Hello from './components/greeter/Hello.vue';
+export default {
+    components: { Hello } //Local Component Registration,we tell to the vue engine that when ever you encounter this , create instance for this component.
+}
+</script>
+<template>
+    <StatusBar></StatusBar>
+    <Hello></Hello>
+</template>
+<style>
+</style>
+,,,,,,,,,,,,,,,,,,,,..................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+...................................................................................
+			Global Vs Local Component Registration
+.................................................................................
+
+=>Global registration prevents build systems from removing unused components (a.k.a "tree-shaking").
+=>If you globally register a component but end up not using it anywhere in your app, it will still be included in the final bundle.
+
+=>Global registration makes dependency relationships less explicit in large applications. 
+
+=>It makes it difficult to locate a child component's implementation from a parent component using it.
+
+=>This can affect long-term maintainability similar to using too many global variables.
+
+=>Global Components need to be imported inside any where
+
+<script>
+// import StatusBar from './components/global/StatusBar.vue';
+import Hello from './components/greeter/Hello.vue';
+export default {
+    components: { Hello } //Local Component Registration,we tell to the vue engine that when ever you encounter this , create instance for this component.
+}
+</script>
+<template>
+    <StatusBar></StatusBar>
+    <Hello></Hello>
+</template>
+<style>
+</style>
+....................................................................................
+....................................................................................
+			 Component Naming Conventions
+.....................................................................................
+
+PascalCase names are valid JavaScript identifiers. This makes it easier to import and register components in JavaScript. It also helps IDEs with auto-completion.
+
+<PascalCase /> makes it more obvious that this is a Vue component instead of a native HTML element in templates. It also differentiates Vue components from custom elements (web components).
+
+This is the recommended style when working with SFC or string templates. However, as discussed in DOM Template Parsing Caveats, PascalCase tags are not usable in DOM templates.
+
+The Component names can be kebab-case /dash case eg
+   <app-root>
+   <hello-world>
+   <greeter>
+Vue supports both cases , but highly recommened is Pascal Case
+
+eg:
+<script>
+//import StatusBar from './components/global/StatusBar.vue';
+import Hello from './components/greeter/Hello.vue';
+export default {
+    //Hello is just Component
+    components: { Hello } //Local Component Registration,we tell to the vue engine that when ever you encounter this , create instance for this component.
+}
+</script>
+<template>
+    <!-- Pascal Case -->
+    <!-- <StatusBar></StatusBar> -->
+    <!-- <Hello></Hello> -->
+    <!-- dash-case/ kebab-case -->
+    <status-bar></status-bar>
+    <hello></hello>
+</template>
+<style>
+
+</style>
+.....................................................................................
+			    Templates
+...................................................................................
+Template is the representation of View
+View is Runtime representation
+
+Template can be static or dynamic 
+
+Static templates are having pure html code
+Dynamic templates are having html code + Vue instructions
+Vue instructions are special symbols
+  
+Template  = html + vue instructions (data,events,props)
+
+Data Binding:
+.............
+  Passing data from the Component to View and View to Component
+
+Types of Data bidning:
+
+1.interpolation
+2.property /props binding
+3.attribute binding
+4.event binding
+5.Two way data binding
+6.class and style binding
+.....................................................................................
+			  MVC  Architecture
+....................................................................................
+
+In order to build user interface we have architectures
+
+1.MVC 
+  It is the most legacy arch but still more popular arch, used in server side,client   side app developments
+
+2.Flex 
+   It is discovered by face book, in order to replace MVC , primarily used in React..
+
+Vue js is MVC Based  and Flex mixed arch -hybrid arch..
+
+M - Model - State - Data
+V - View  - User interface
+C - Controller - Having data and biz logic
+
+Vue and MVC:
+<script>
+   // M + C ->logic
+</script>
+<template> 
+   View logic 
+</template>
+<style>
+</style>
+
+...................................................................................
+				Interpolation
+....................................................................................
+
+Transfering data(state) from (controlller) to View.
+
+State:
+  State Can be represented in two ways
+1.primitives - numbers,strings,boolean
+  let name='subramanian'
+  let salary=100
+  let isValid=true
+2.objects and collections -  literal object,arrays
+  
+  let profile = {
+    id:1,
+    name:'Arun'
+  }
+  let profiles = [{
+    id:1,
+    name:'Arun'
+  },{
+    id:2,
+    name:'Bala'
+  }]
+
+
+SFC:
+ 1.Using Options api
+ 2.Using Composition api
+    -with setup fun
+    -withut setup fun.
+
+
+1.Using Options api
+  Encapsulate options inside literal object
+
+let options = {
+   data:?
+   props:?
+   methods:?
+}
+
+Exploring Options Api
+
+let options = {
+   data:function(){
+	return {state...}
+   }
+}
+data is function which encapulates state(model)
+data function must return object which encapsulate "state"
+
+es 6 way of writing functions:
+let options = {
+   data(){
+	return {state...}
+   }
+}
+
+How to bind data inside template which was returned from the "data" function.
+
+{{variableName}} - interplation
+.....................................................................................
+Options api state declaration:
+<!-- Options Api : State declaration and interpolation -->
+<script>
+export default {
+    //declare state(model)
+    //es 5 style of declaration data function
+    // data: function () {
+    //     //state object which contains data
+    //     return {
+    //         name: 'Subramanian'
+    //     }
+    // }
+    //es 6 style of declaration data function
+    data() {
+        //state object which contains data
+        return {
+            firstName: 'Subramanian',
+            lastName:'Murugan',
+            city:'Coimbatore'
+        }
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>User</h1>
+        <h3>Name {{ firstName }} {{ lastName }}</h3>
+        <h3>City {{city }}</h3>
+    </div>
+</template>
+<style>
+
+</style>
+<script> 
+.................................
+
+without setup attribute:
+The component logic must be encapsulated inside a function called "setup"
+
+export default {
+
+ setup(){
+
+   return {} //must return state
+ }
+
+}
+
+eg:
+<script>
+export default {
+    setup() {
+        //state declarations 
+        const firstName = 'Subramanian'
+        const lastName = 'Murugan'
+        //encapsulate this data into object
+        // return {
+        //     firstName: firstName,
+        //     lastName:lastName
+        // }
+        return {
+            firstName, lastName // es 6 destructuring stynax
+        }
+    }
+}
+</script>
+<template>
+    <h1>Name {{firstName}} {{lastName}}</h1>
+</template>
+<style>
+
+</style>
+....................................................................................
+<!-- Composition Api with setup attribute : State declaration and interpolation -->
+<script setup>
+//declare state variables
+const firstName = 'Subramanian'
+const lastName = 'Murugan'
+const address = {
+    city: 'Coimbatore',
+    state: 'TN'
+}
+</script>
+<template>
+    <div>
+        <h1>User</h1>
+        <h3>Name {{ firstName }} {{ lastName }}</h3>
+        <h3>City {{ address.city }} State {{ address.state }}</h3>
+    </div>
+</template>
+<style>
+
+</style>
+
+..........
+.....................................................................................
+				Directives
+....................................................................................
+
+What is directive?
+  Directive is object which helps to create custom elements and attributes.
+  Directives enchances existing html elements - We extend the functionality of HTML   elements.
+  We are going to add new behaviour to the HTML elements.
+
+Vue is highly modular framework, code Resue is Main Objective.
+
+Code Resue Patterns:
+...................
+
+1.Components
+2.Composables(Hooks)
+3.Directives
+		
+
+Components are main building blocks.
+Composable are focused on "Resuing stateful logic" - Data isloation.
+Directives are mainly intented for resuing logic that involes low level DOM Acess on Plain Elements -DOM Element features.
+
+HTML elements Types:
+
+1.Built in element and attributes
+2.Custom elements and attributes
+
+<h1>Hello</h1> -  built in element
+
+HTML Compiler Work flow:
+.......................
+
+
+<h1>Hello</h1> -----Compiler verfies this element is built in or not
+				|
+		   --------------------------------
+		   |                              |
+                 Yes                             No
+		  |                              |
+Browser parses the                    Brower throws exception                       called                                "UnknownElement"
+element and convert                   which is converted into plain ascii node
+it , render accordingly
+
+
+<app-drawer> - it is custom element, generally browser does not under stand.
+
+In 2007, W3c introduced new idea that developers can add their own tags/elements(custom elements and custom attributes)
+   HTML 5 Specification
+
+built in element logic is already written, so that browser easily understands that.
+
+What about custom element, how to teach browser to understand custom elements?
+    
+  "Through Javascript"
+
+<app-drawer> ---|JS Code--->Runs ---renders in the browser....
+   
+eg:
+<script setup>
+import AppDrawer from './components/drawer/AppDrawer.vue'
+</script>
+<template>
+<h1>Drawer App</h1>
+<!-- Custom element -->
+<app-drawer></app-drawer>
+</template>
+<style>
+
+</style>
+
+src/componnets/drawer/AppDrawer.vue
+<script setup>
+</script>
+<template>
+    <p>Drawer Element</p>
+</template>
+<style>
+</style>
+
+               "Every Component is a Custom element only"
+
+.....................................................................................
+			Custom Attributes
+.....................................................................................
+
+1.Built in element Attributes
+
+ <img src="" alt="">
+       |      |
+   Attributes - Built in attributes
+
+Browser knows how to put logic to src and alt.
+
+2.Custom attributes on existing html elements
+
+<img customAttribute />
+        | 
+     custom attribute
+How to teach browser to parse custom Attributes 
+  "Through Javascript"
+
+eg: Vue rendered page:
+
+<div id="app" data-v-app="">
+<h1>Drawer App</h1>
+ <!-- Custom element --><p>Drawer Element</p>
+</div>
+.....................................................................................
+Vue.js Helps to add Custom attributes on existing elements via "Directives" -Attribute Directives
+.....................................................................................
+
+Vue js attribute directive syntax:
+
+v-directiveName
+
+Built in Directives:
+...................
+v-text
+v-html
+v-show
+v-if
+v-else
+v-else-if
+v-for
+v-on
+v-bind
+v-model
+v-slot
+v-pre
+v-once
+v-memo
+v-cloak
+
+Special Attributes
+key
+ref
+is
+.....................................................................................
+			    v-html and v-text
+...................................................................................
+
+v-html :
+ inserts data into html element as "HTML"  - innerHTML 
+{{}} 
+  inserts data into html element as "Plain Text"
+
+				v-text
+
+Update the element's text content. - innerText
+
+<script setup>
+//variable
+const name = 'Subramanian'
+</script>
+<template>
+    <h1>Interpolation using mustace notation</h1>
+    <h2>Name {{name}}</h2>
+    <h1>Interpolation using using Directives-text </h1>
+    <h2 v-text="`name ${name}`"></h2>
+    <h1>Interpolation using using Directives-html </h1>
+    <h2 v-html="`name ${name}`"></h2>
+</template>
+<style>
+
+</style>
+....................................................................................
+			 v-bind
+...................................................................................
+
+V-binds html attributes values or components values(properties) dynamically.
+
+Binding: Attach value to the attribute
+
+Static Binding
+  <img src="logo.png"/>
+here value of src cant be changed once the ui rendered
+
+Dynamic Binding
+ <img v-bind:src="variableHoldingImage" /> 
+Short cut:
+ <img :src="variableHoldingImage" /> 
+  here v-bind is implicit
+
+Note:  
+ v-bind  directive can be used for any dom or component attributes or props 
+
+<script setup>
+ const imageUrl ="/src/assets/logo.svg"
+ const isEnabled = true 
+ const isHidden = true
+</script>
+<template>
+    <h1>Bind Directives</h1>
+    <div>
+        <h2>Static Binding</h2>
+        <img src="./assets/logo.svg" height="100" width="100" />
+    </div>
+    <div>
+        <h2>Dynamic Binding using v-bind Directive</h2>
+        <img v-bind:src="imageUrl" height="100" width="100" />
+    </div>
+    <div>
+        <h2>Dynamic Binding using v-bind Directive with Short cut</h2>
+        <img :src="imageUrl" height="100" width="100" />
+    </div>
+    <div>
+        <h2>Dynamic Binding using v-bind Directive</h2>
+        <button :disabled="isEnabled">Enable</button>
+    </div>
+    <div>
+        <article :hidden="isHidden">
+             <p>This is vue article</p>
+        </article>
+    </div>
+</template>
+<style>
+
+</style>
+.....................................................................................
+			Component Driven Design principles
+.....................................................................................
+
+Role of Components / Responsibility of Component:
+..................................................
+
+Component having state,bizlogic,ui
+
+As per component design design principles , we need to apply modularity concept.
+  Break the component based on two aspects
+
+1.Having data and biz logic
+    -Parent Component /Container component
+2.Having UI logic
+    -Child Component/Presentational Component
+
+
+Data(State) Sharing Patterns/ Data(State) Representation Patterns:
+....................................................
+
+1.Props Pattern
+  The data is shared from the Parent Component to Child Component.
+2.State Pattern
+
+If you want understand the component hierachy ,so that it is easy to explore how data is shared.
+
+Vue dev tool
+https://devtools.vuejs.org/guide/installation.html
+
+
+Parent Component
+   <ProductDetails title="Product Details" ></ProductDetails>
+                     |            |
+                  PropertyName   Property value
+   <div id="">
+	 |
+       attribute
+
+
+How to structure a Large scale vue.js app
+
+Default strcture
+
+src
+  |
+  components
+    |
+    User 
+    Product
+    Comments
+    Payment
+
+Standard Structure of apps would be domain model
+
+src
+  |
+  components
+    |
+    User 
+      Userlist.vue
+      UserDetails.vue
+      User.vue
+   Product	
+      ProductList.vue
+      ProductDetails.vue
+      Product.vue
+   stores
+   layouts
+   plugins
+   directives
+   helpers/utils
+
+Props Handling:
+Using options Api
+
+src/components/products/ProductMaster.vue
+<script setup>
+import ProductDetails from "./ProductDetails.vue";
+</script>
+<template>
+    <h2>Product Master</h2>
+    <hr>
+    <ProductDetails title="Product Details" ></ProductDetails>
+</template>
+<style>
+</style>
+
+src/components/products/ProductDetails.vue
+<!-- Options Api Pattern -->
+<script>
+export default {
+    props: ['title']
+}
+</script>
+<template>
+ <div>
+    <h1>{{title}}</h1>
+ </div>
+</template>
+<style>
+</style>
+.....................................................................................
+		.....................................................................................
+				Prop inside Composition Api
+
+
+With setup function
+<!-- composition Api Pattern -->
+<script>
+export default {
+    props: ['title'],
+    setup() {
+        
+    }
+
+}
+</script>
+<template>
+    <div>
+        <h1>{{title}}</h1>
+    </div>
+</template>
+<style>
+
+</style>
+
+what if i want to access props inside setup function?
+
+<script>
+export default {
+    props: ['title'],
+    setup() {
+        console.log(this.props)
+	    console.log(props)
+    }
+
+}
+</script>
+Both will throw error?
+Uncaught ReferenceError: props is not defined
+    at setup (ProductDetails.vue:6:21)
+    at callWithErrorHandling (runtime-core.esm-bundler.js:155:22)
+    at setupStatefulComponent (runtime-core.esm-bundler.js:7187:29)
+    at setupComponent (runtime-core.esm-bundler.js:7142:11)
+    at mountComponent (runtime-core.esm-bundler.js:5491:13)
+    at processComponent (runtime-core.esm-bundler.js:5466:17)
+    at patch (runtime-core.esm-bundler.js:5068:21)
+   
+soultion:
+  we have to declare arg variable for setup function, vue actually injects
+props into that variable.
+
+<!-- Composition Api Pattern -->
+<script>
+export default {
+    props: ['title'],
+    setup(props) {
+        console.log(props.title)
+        return {
+            props
+        }
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>{{title}}</h1>
+    </div>
+</template>
+<style>
+
+</style>
+....................................................................................
+			 Props inside Setup Attribute
+...................................................................................
+Vue offers an composable function called "defineProps"
+
+<!-- Composition Api Pattern -->
+<script setup>
+const props = defineProps(['title'])
+// export default {
+//     props: ['title'],
+//     setup(props) {
+//         console.log(props.title)
+//         return {
+//             title : props.title
+//         }
+//     }
+// }
+
+</script>
+<template>
+    <div>
+        <h1>{{props.title}}</h1>
+        <h1>{{title}}</h1>
+    </div>
+</template>
+<style>
+
+</style>
+..................................................................................
+....................................................................................
+			 Property Validation
+....................................................................................
+
+Some times i want to enforce the property data type validation, which is only for runtime vertification.
+
+eg:
+ i have property called age
+ i need to define rule for age that age must be number,it should not be string.
+
+defineProps Syntax:
+1.simple Syntax
+defineProps(['propName','propName'])
+
+2.Complex Syntax : prop validation rule, default value 
+
+  defineProps({
+     age:Number,  
+     id: [Number,String] // can be string or can be number
+     name: {
+      type:String
+      required:true,
+      default:'name'
+     },
+    status: {
+	validator(value){
+	  return ['OK','NotOk','Success','Failure'].includes(value)
+       }
+    }
+ })
+
+Runtime Types:
+1.String
+2.Number
+3.Boolean
+4.Array
+5.Object
+6.Date
+7.Function
+8.Symbol
+
+
+<script setup>
+//const props = defineProps(['title'])
+const props = defineProps({
+    title: {
+        type:String,
+        default: 'Default Props'
+    }
+})
+</script>
+<template>
+    <div>
+        <h1>{{props.title}}</h1>
+    </div>
+</template>
+<style>
+
+</style>
+
+<script setup>
+import ProductDetails from "./ProductDetails.vue";
+
+const title = 'Product Details!!'
+const intTitle = 100
+</script>
+<template>
+    <h2>Product Master</h2>
+    <hr>
+    <!-- <ProductDetails title="Product Details" ></ProductDetails> -->
+    <!-- <ProductDetails :title="title"></ProductDetails> -->
+    <ProductDetails></ProductDetails>
+    <ProductDetails :title="title"></ProductDetails>
+    <ProductDetails :title="intTitle"></ProductDetails>
+
+
+</template>
+
+<style>
+
+</style>
+
+runtime-core.esm-bundler.js:38 [Vue warn]: Invalid prop: type check failed for prop "title". Expected String with value "100", got Number with value 100. 
+  at <ProductDetails title=100 > 
+  at <ProductMaster> 
+  at <App>
+.....................................................................................
+.....................................................................................
+			One way data flow Model
+.....................................................................................
+All props forms a one way data flow model, where child component cant update the properties
+
+			"Props are read only"
+
+<script setup>
+//const props = defineProps(['title'])
+const props = defineProps({
+    title: {
+        type:String,
+        default: 'Default Props'
+    }
+})
+//update property - props are read only
+props.title = "something"
+</script>
+<template>
+    <div>
+        <h1>{{props.title}}</h1>
+    </div>
+</template>
+<style>
+
+</style>
+
+reactivity.esm-bundler.js:4 [Vue warn] Set operation on key "title" failed: target is readonly. Proxy
+warn @ reactivity.esm-bundler.js:4
+reactivity.esm-bundler.js:4 [Vue warn] Set operation on key "title" failed: target is readonly. Proxy
+warn @ reactivity.esm-bundler.js:4
+runtime-core.esm-bundler.js:38 [Vue warn]: Invalid prop: type check failed for prop "title". Expected String with value "100", got Number with value 100. 
+  at <ProductDetails title=100 > 
+  at <ProductMaster/>
+....................................................................................
+Case Study:
+  You have to create User compoent having user details
+  1.basic user info - like id,firstName,lastName
+  2.address - street,city,state,country,zipcode
+  3.Logo - img
+  4.location - lat, lng
+
+ User
+  |
+  Address
+  Logo
+  Location
+....................................................................................
+			   Event Handling
+....................................................................................
+Event handling is one of the most popular concept in javascript as part of DOM programming.
+Event handling helps to interact with user.
+Events  are signals triggered by user or system, send to os system, the software or hardware reacts according to the event.
+
+Events are classified into two category
+
+1.Hardware events
+   Triggered by user or system, interacts with hardware devices   
+eg:
+  Mouse events
+    onclick,ondblclick,onmouseenter...
+  https://www.w3schools.com/jsref/obj_mouseevent.asp
+  Keyboard events
+   onkeypress,onkeydown
+  https://www.w3schools.com/jsref/event_onkeypress.asp
+  Touch events
+  ontouchstart,ontouchend
+  https://www.w3schools.com/jsref/obj_touchevent.asp
+
+2.Application events
+   attached with objects called dom objects
+  onload,oncomplete
+
+...................................................................................
+				        How event handling works
+
+Event handling has been designed based on the design pattern called "pub-sub"/observer design pattern.
+
+There are two actors:
+1.Producer
+   The producer is something who sends signals(events - name of the event and data assoicated) to the listener
+2.Listener
+  The Listener is someone who waits/listens for event.
+  Once the event is given who reacts/respond
+
+In js :
+ Listener is function.
+
+//event is just reference to the Event Object having information about event, and data
+function listener(event){
+     event.target.value
+}
+event object is a bridge between producer and listener
+
+In javascript , events are given by language itself.
+
+events are started with "on+eventName" - 
+ onclick="listener"
+
+addEventListener('click',listener)
+listeners are plain js functions with event object reference arg
+
+Frameworks like vue,react,angular who adds their own abstractions.
+
+We can attach event on any dom element which could be application or hardware
+
+Vue Js and event handling:
+..........................
+
+Vue attaches events with any element with help of directive
+                          "v-on"
+
+Syntax:
+1. v-on:NameOftheEvent="listener" -  v-on:click="update"
+2. @click="listener" - @click="update"
+
+Event Handling : Options Api Pattern:
+......................................
+
+<script>
+export default {
+    //event handlers
+    methods: {
+        //arg
+        //event is just variable points to "EventTarget Object":Bridge object between listener and DOM element
+        hello(event) {
+            console.log(event)
+            console.log('Hello event is triggered')
+        },
+        hai() {
+            console.log('Hai event is triggered')
+        }
+    }
+}
+</script>
+<template>
+    <button v-on:click="hello">Hello</button>
+    <button @click="hello">Hai</button>
+
+</template>
+<style>
+
+</style>
+...................................................................................
+        Event Listener with compostion pattern using setup function
+...............................................................................
+
+<script>
+export default {
+    setup() {
+        //declare listener - es 5
+        // function hello(evt) {
+        //     console.log(evt)
+        //     console.log('hello')
+        // }
+        // function hai() {
+        //     console.log('hai')
+        // }
+        //declare event listener -es 6 arrow functions
+        const hello = (evt) => {
+            console.log(evt)
+            console.log('hello')
+        }
+        const hai = () => console.log('hai')
+        
+        return {
+            hello, hai
+        }
+    }
+}
+</script>
+<template>
+    <button v-on:click="hello">Hello</button>
+    <button @click="hai">Hai</button>
+
+</template>
+<style>
+
+</style>
+...................................................................................
+        Event Listener with compostion pattern using setup attribute
+...............................................................................
+<script setup>
+const hello = (evt) => {
+    console.log(evt)
+    console.log('hello')
+}
+const hai = () => console.log('hai')
+</script>
+<template>
+    <button v-on:click="hello">Hello</button>
+    <button @click="hai">Hai</button>
+
+</template>
+<style>
+
+</style>
+....................................................................................
+		 How to attach more than one listener on single DOM Element
+...................................................................................
+
+<dom v-on:eventName="listener" v-on:eventName="listener">
+<dom v-on="{mouseenter:onMouseEnter,mouseleave:onMouseLeave}">
+
+<script setup>
+const onMouseEnter = (evt) => {
+    console.log(evt)
+    console.log('mouse enter')
+}
+const onMouseLeave = () => console.log('mouse leave')
+</script>
+<template>
+    <div v-on="{mouseenter:onMouseEnter,mouseleave:onMouseLeave}">
+        Touch
+    </div>
+</template>
+<style>
+
+</style>
+...............................................................................
+..............................................................................
+..................................................................................
+			  How to pass data to the event listener
+..................................................................................
+const getData = (data,event) => {
+    console.log(data,event)
+}
+ <button @click="getData('hello',$event)">Pass Data</button>
+
+when we pass data to the listener, vue cant  pass event implicitly, we have to pass event object explicitly via "$event" which is global event object provided by vue.
+....................................................................................
+			 Reactive State
+...................................................................................
+
+Options Api with Reactive State and How to mutate them?
+  State + Event Handling
+
+
+data: 
+ method which always returns reactive state
+
+data() {
+
+ //reactive state 
+ return {
+    count:0
+ }
+}
+eg
+<script>
+
+export default {
+    data() {
+        //return reactive state object
+        return {
+            count: 0
+        }
+    },
+    methods: {
+        //listener
+        inc() {
+            //mutate the reactive variable
+            this.count++ //mutation
+        }
+    }
+}
+
+</script>
+<template>
+    <div>
+        <h1>Reative State Using Options Api</h1>
+        <h1>Counter : {{count}}</h1>
+        <button @click="inc">+</button>
+    </div>
+</template>
+.....................................................................................
+			State Update using Composition Api
+...........................................
+<script>
+
+export default {
+    setup() {
+
+        //state
+        let count = 0
+        //listener
+        const inc = () => {
+            console.log(count)
+            count++
+        }
+
+        return {
+            count,
+            inc
+        }
+    }
+}
+
+</script>
+<template>
+    <div>
+        <h1>Reative State Using Options Api</h1>
+        <h1>Counter : {{count}}</h1>
+        <button @click="inc">+</button>
+    </div>
+</template>
+
+After running this code, 
+	Here we are trying to mutate/update the "count" state variable, there is update happening but it does not trigger "view update"
+....................................................................................
+
+
