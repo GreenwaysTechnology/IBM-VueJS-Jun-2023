@@ -8,7 +8,7 @@ const todos = reactive(TODOS)
 <template>
     <div>
         <ul>
-            <li v-for="todo in todos" :key="todo.id">
+            <li v-for="todo in todos">
                 <span>{{ todo.title }}</span>
             </li>
         </ul>
