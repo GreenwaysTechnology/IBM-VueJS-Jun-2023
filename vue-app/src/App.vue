@@ -1,31 +1,15 @@
 <script setup>
-import Layout from './components/slots/Layout.vue'
+import { ref } from 'vue';
+const toggle = ref('')
+const truthyValue="Yes"
+const falsyValue="No"
 </script>
 <template>
-    <h1>Vue Application</h1>
-    <Layout>
-        <!-- <template v-slot:header>
-            <h1>Header</h1>
-        </template>
-        <template v-slot:main>
-            <p>This is body</p>
-        </template>
-        <template v-slot:footer>
-            <h3>Footer</h3>
-        </template> -->
-        <!-- Short cut using #name syntax  -->
-        
-      <template #header>
-            <h1>Header</h1>
-        </template>
-        <template #main>
-            <p>This is body</p>
-        </template>
-        <template #footer>
-            <h3>Footer</h3>
-        </template>
-    </Layout>
+    <div>
+        <input type="checkbox" :true-value="truthyValue" checked :false-value="falsyValue" v-model="toggle" />
+        <label for="Toggle">Toggle</label>
+    </div>
+    <div>
+        {{ toggle }}
+    </div>
 </template>
-<style>
-
-</style>
