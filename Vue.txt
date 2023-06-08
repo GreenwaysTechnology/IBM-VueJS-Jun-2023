@@ -4853,3 +4853,1263 @@ Build Registration form:
 =>Create  User Registration form 
 =>Submit the form details to the Parent
 .....................................................................................
+.....................................................................................
+			   API calls in vue
+.....................................................................................
+Patterns:
+1.you can write api call within component
+2.you can write api call outside component using composable
+3.you can write api call outside component using state management libs
+
+Vue has no any opinion to select lib for making api calls, you can use fetch,axios.
+
+Component life cycles:
+
+created(element,binding,vnode,prevNode)
+
+beforeMount () - called before the target element is inserted into dom
+
+mounted() -> called before the parent component is updated
+
+beforeUpdate()- called after the parent component and all of its childern have updated
+
+update() -called after beforeUpdate
+
+beforeUnmount() - before removing element
+
+unmounted()  - when component is unmounted.
+
+.....................................................................................
+
+Api calls can be made during inital page render-mounted
+Api calls can be made during user interaction.
+
+.....................................................................................
+			   Ajax calls/api calls from vue
+....................................................................................
+
+<script setup>
+import { onMounted, ref } from 'vue';
+const data = ref(null)
+const error = ref(null)
+
+function fetchData() {
+    const url = 'https://jsonplaceholder.typicode.com/todos'
+    fetch(url)
+        .then(response => response.json())
+        .then(todos => {
+            data.value = todos
+            console.log(data.value)
+        }).catch(err => {
+            console.log('error')
+            error.value = err
+        })
+}
+onMounted(() => {
+    fetchData()
+})
+</script>
+<template>
+    <div>Todo App</div>
+    <div v-if="error">Opps! Error Encountered</div>
+    <div v-else-if="data">
+        <div v-for="todo of data">
+            <p>{{todo.title}}</p>
+        </div>
+    </div>
+    <div v-else>
+        <h1>Loading...</h1>
+    </div>
+</template>
+<style>
+
+</style>
+...................................................................................
+		  How to isloate the ajax logics using composables
+...................................................................................
+What is a "Composable"?
+
+In the context of Vue applications, a "composable" is a function that leverages Vue's Composition API to encapsulate and reuse stateful logic.
+
+When building frontend applications, we often need to reuse logic for common tasks. For example, we may need to format dates in many places, so we extract a reusable function for that. 
+
+This formatter function encapsulates stateless logic: it takes some input and immediately returns expected output. There are many libraries out there for reusing stateless logic
+
+Mouse Tracker Example
+
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+
+const x = ref(0)
+const y = ref(0)
+
+function update(event) {
+  x.value = event.pageX
+  y.value = event.pageY
+}
+
+onMounted(() => window.addEventListener('mousemove', update))
+onUnmounted(() => window.removeEventListener('mousemove', update))
+</script>
+
+<template>Mouse position is at: {{ x }}, {{ y }}</template>
+
+But what if we want to reuse the same logic in multiple components? We can extract the logic into an external file, as a composable function:
+
+// mouse.js
+import { ref, onMounted, onUnmounted } from 'vue'
+
+// by convention, composable function names start with "use"
+export function useMouse() {
+  // state encapsulated and managed by the composable
+  const x = ref(0)
+  const y = ref(0)
+
+  // a composable can update its managed state over time.
+  function update(event) {
+    x.value = event.pageX
+    y.value = event.pageY
+  }
+
+  // a composable can also hook into its owner component's
+  // lifecycle to setup and teardown side effects.
+  onMounted(() => window.addEventListener('mousemove', update))
+  onUnmounted(() => window.removeEventListener('mousemove', update))
+
+  // expose managed state as return value
+  return { x, y }
+}
+
+// event.js
+import { onMounted, onBeforeUnmount } from 'vue'
+
+export function useEventListener(target, event, callback) {
+  // if you want, you can also make this
+  // support selector strings as target
+  onMounted(() => target.addEventListener(event, callback))
+  onBeforeUnmount(() => target.removeEventListener(event, callback))
+}
+
+// mouse.js
+import { ref } from 'vue'
+import { useEventListener } from './event'
+
+export function useMouse() {
+  const x = ref(0)
+  const y = ref(0)
+
+  useEventListener(window, 'mousemove', (event) => {
+    x.value = event.pageX
+    y.value = event.pageY
+  })
+
+  return { x, y }
+}
+...................................................................................
+
+composable/useFetch.js
+import { onMounted, ref } from 'vue'
+export default function useFetch(url = '') {
+    const data = ref(null)
+    const error = ref(null)
+
+    function fetchData() {
+        //const url = 'https://jsonplaceholder.typicode.com/todos'
+        fetch(url)
+            .then(response => response.json())
+            .then(todos => {
+                data.value = todos
+                console.log(data.value)
+            }).catch(err => {
+                console.log('error')
+                error.value = err
+            })
+    }
+    onMounted(() => {
+        fetchData()
+    })
+    return {
+        data, error
+    }
+}
+
+
+<script setup>
+import useFetch from './composables/useFetch.js'
+const url = 'https://jsonplaceholder.typicode.com/todos'
+const { data, error } = useFetch(url)
+</script>
+<template>
+    <div>Todo App</div>
+    <div v-if="error">Opps! Error Encountered</div>
+    <div v-else-if="data">
+        <div v-for="todo of data">
+            <p>{{todo.title}}</p>
+        </div>
+    </div>
+    <div v-else>
+        <h1>Loading...</h1>
+    </div>
+</template>
+<style>
+
+</style>
+
+Now vue starts using lot of composable apis, which ias every growing....
+https://vueuse.org/
+
+<script setup>
+import useFetch from './composables/useFetch.js'
+import { useTitle } from '@vueuse/core'
+
+const url = 'https://jsonplaceholder.typicode.com/todos'
+const title = useTitle('New Titlte', { titleTemplate: '%s My Awesome Website' })
+
+const { data, error } = useFetch(url)
+</script>
+<template>
+    <div>Todo App</div>
+    <div v-if="error">Opps! Error Encountered</div>
+    <div v-else-if="data">
+        <div v-for="todo of data">
+            <p>{{todo.title}}</p>
+        </div>
+    </div>
+    <div v-else>
+        <h1>Loading...</h1>
+    </div>
+</template>
+<style>
+
+</style>
+.....................................................................
+.....................................................................................
+				Custom Directives
+.....................................................................................
+
+Code Reuse in Vue:
+
+The application code can be reused in vue in various ways.
+
+1.Composables
+   Way to reuse app state logic
+2.Components
+   Way to resue UI 
+3.Directives 
+   Way to resue underlaying dom features
+
+There are different types of directives 
+
+1.built in directives
+   Directives are provided by vue - v-on,v-bind....
+2.custom directives
+
+
+How to create simple custom Directive?
+
+Directive is object, having low level dom features.
+
+Steps:
+
+1.create directive object
+<script setup>
+//first directive
+const vFocus = {
+    //define life cycle methods
+    mounted: (element) => {
+        //we can get dom element here, what ever you want you can do
+        console.log(element)
+        element.focus()
+    }
+}
+</script>
+
+2.attach directive on html element.
+<template>
+    <input v-focus>
+</template>
+
+.....................................................................................
+			 DOM Manipulation using Directives
+
+<script setup>
+const vHighlight = {
+
+    mounted: (element) => {
+        //
+        element.addEventListener('mousemove', evt => {
+             highLight('yellow')
+        })
+        element.addEventListener('mouseleave', evt => {
+            highLight(null)
+        })
+        const highLight = color => {
+            element.style.backgroundColor = color
+        }
+    }
+}
+</script>
+<template>
+    <h1 v-highlight>HighLight Me!</h1>
+</template>
+<style>
+
+</style>
+.....................................................................................
+		    Component/Directive Hooks
+.....................................................................................
+Directive Hooks:
+  Directive hooks are methods which are called in every life cycle of directive
+
+created(element,binding,vnode,prevNode)
+
+beforeMount () - called before the target element is inserted into dom
+
+mounted() -> called before the parent component is updated
+
+beforeUpdate()- called after the parent component and all of its childern have updated
+
+update() -called after beforeUpdate
+
+beforeUnmount() - before removing element
+
+unmounted()  - when component is unmounted
+.....................................................................................
+			 Directives parameters,modifiers,args
+.....................................................................................
+binding object hold all information about directive
+
+
+How to pass parameter to directive?
+
+<input v-bind:value="msg">
+                      |
+		    Parameter				
+  
+import { createApp } from 'vue'
+import App from './App.vue'
+
+createApp(App)
+    .provide('company', 'google')
+    .directive('focus', (element, binding) => {
+        console.log('directive => ', element)
+        element.focus()
+    })
+    .directive('highlight', (element, binding) => {
+      
+        //set inital color:
+        element.style.backgroundColor = binding.value
+        element.addEventListener('mousemove', (evt) => {
+            //element.style.backgroundColor = 'yellow'
+            highLight('yellow')
+        })
+        //remove style
+        element.addEventListener('mouseleave', (evt) => {
+            // element.style.backgroundColor = null
+            highLight(null)
+        })
+        const highLight = (color) => {
+            element.style.backgroundColor = color
+        }
+    })
+    .mount('#app')
+
+.....
+another eg:
+<script setup>
+import { ref } from 'vue'
+const color = ref('green')
+</script>
+<template>
+    <h1 v-highlight.value="color">HighLight</h1>
+    <!-- directive:arg.modifier -->
+    <h1 v-highlight:foo.bar="color">HighLight</h1>
+
+    <p v-demo>this is demo directive -simple</p>
+    <p v-demo:foo>this is demo directive-arg</p>
+    <p v-demo:foo.bar>this is demo directive-modifier</p>
+    <p v-demo:foo.bar="color">this is demo directive</p>
+    <p v-demo:foo.bar="{ color: 'green', label: 'Greetings' }">this is demo 
+    
+    directive</p>
+    <p v-demo:value="color">this is demo directive-arg</p>
+    <p v-demo="color">this is demo directive-arg</p>
+
+</template>
+import { createApp } from 'vue'
+import App from './App.vue'
+import StatusBar from './components/StatusBar.vue'
+
+// import './assets/main.css'
+
+// createApp(App).mount('#app')
+const app = createApp(App)
+//global Component
+app.component('StatusBar', StatusBar)
+//global data 
+app.provide('company', 'google')
+
+//global directives
+app.directive('highlight', (element, binding) => {
+    //console.log('element', element)
+    //console.log('binding', binding)
+
+    //get parameters supplied as part of directive
+    console.log(binding)
+    console.log('value', binding.value)
+
+    element.addEventListener('mousemove', (evt) => {
+        //element.style.backgroundColor = 'yellow'
+        highLight('pink')
+    })
+    //remove style
+    element.addEventListener('mouseleave', (evt) => {
+        // element.style.backgroundColor = null
+        highLight(null)
+    })
+    const highLight = (color) => {
+        element.style.backgroundColor = color
+    }
+    highLight(binding.value)
+
+})
+app.directive('demo', (element, binding) => {
+    console.log('element => ', element)
+    console.log('binding => ', binding)
+})
+
+
+app.mount('#app')
+
+.....................................................................................
+
+import { createApp } from 'vue'
+import App from './App.vue'
+import StatusBar from './components/global/StatusBar.vue'
+// import './assets/main.css'
+// console.log(App)
+// const app = createApp(App)
+// app.component('StatusBar', StatusBar)
+// app.mount('#app')
+
+createApp(App)
+     //key-Component Name,value-Component Reference(Object)
+     .component('StatusBar', StatusBar)
+     .provide('company', 'IBM')
+     .directive('highlight', (element, binding) => {
+          //binding is reference of Binding object which can capture the parameters
+          //passed as part of directive
+          console.log(binding)
+          if(binding.modifiers.bar){
+               element.style.color = 'green'
+          }
+          element.style.backgroundColor = binding.value
+          element.addEventListener('mousemove', (evt) => {
+               //element.style.backgroundColor = 'yellow'
+               highLight('yellow')
+          })
+          //remove style
+          element.addEventListener('mouseleave', (evt) => {
+               // element.style.backgroundColor = null
+               highLight(null)
+          })
+          const highLight = (color) => {
+               element.style.backgroundColor = color
+          }
+     })
+     .mount('#app')
+
+<script setup>
+import {ref} from 'vue'
+const color = ref('blue')
+</script>
+<template>
+    <!-- sending parameters to directive -->
+    <h1 v-highlight.value="color">Highlight</h1>
+    <!-- Directive Modifer : args -->
+    <h1 v-highlight:foo.bar="color">Highlight</h1>
+
+</template>
+<style>
+</style>
+....................................................................................
+			   Plugins
+....................................................................................
+What is plugin?
+
+ Plugins are self contained code that usuallay add app-top level functionality to Vue.
+Most of third party libs are integrated as plugin with vue echo system eg: Vue-router
+Statement management libs like vuex,Pinia.
+
+Plugins are distribtued as npm modules, in order to use plugins, we have to do two things
+
+1.install plugin as npm moudle
+
+ npm install vue-router@4
+
+2.Integrate with Application object
+
+const app =createApp(App)
+
+//directives
+app.directive('demo',{})
+//components
+app.components('component',{})
+
+//plugins
+app.use(myPlugin)
+app.use(router)
+
+app.mount("#app");
+.....................................................................................
+How to write Custom Plugins?
+
+Steps 1:
+src/plugins/myPlugin.js
+//uppercase 
+export const myPlugin = {
+    install(app, options) {
+        //application object referenced in the plugin as first parameter
+        app.config.globalProperties.$uppercase = key => {
+            return key.toUpperCase();
+        }
+    }
+}
+
+Step 2: Register the Plugin in application object.
+
+import { createApp } from 'vue'
+import App from './App.vue'
+import { myPlugin } from './plugins/myplugin'
+
+createApp(App)
+    .use(myPlugin)
+    .mount('#app')
+
+Step 3: 
+Use Plugin functionality inside app
+
+<script setup>
+</script>
+<template>
+  <h1>{{$uppercase('hello,how are you')}}</h1>
+</template>
+
+////////////////////////////////////////////////////////////////////////////////////
+			         SPA
+...................................................................................
+
+...................................................................................
+		     	How to build SPA :Routing
+....................................................................................
+
+SPA is type of web application built for browsers, all navagations are done by javascript  , html only.
+
+SPA is called client side routing.
+
+SPA core features:
+
+1.all navagation is controlled inside browser only
+2.From the server we get only data via apis as json format
+3.In spa, only we have one physical page called landing page /home page
+4.Name of the landing page would be "index.html"
+5.Rest of application page are called "virtual pages" which are created by js  dynamically we call "components"
+6.navigation is controlled by javascript objects called "location and histroy objects"
+7.Frameworks for routing is built on the top of these objects only.
+8.in order to build routing we need "HTML 5" 
+
+
+Routing can be implemented using plain js,html5,ajax,css3 itself, but in large scale we need framework, Vue supports official "vue router" which is supplied as "plugin"
+
+How to start using router?
+
+for existing application
+
+1.npm install vue-router@4
+
+2.Application configuration
+  app.use(router)
+
+For creating new application.
+
+npm init vue@latest
+
+Vue.js - The Progressive JavaScript Framework
+
+√ Project name: ... vue-spa
+√ Add TypeScript? ... No / Yes
+√ Add JSX Support? ... No / Yes
+√ Add Vue Router for Single Page Application development? ... No / Yes - Yes
+√ Add Pinia for state management? ... No / Yes
+√ Add Vitest for Unit Testing? ... No / Yes
+√ Add Cypress for both Unit and End-to-End testing? ... No / Yes
+√ Add ESLint for code quality? ... No / Yes
+
+Scaffolding project in E:\session\IBM\2022\oct\vuejs-session\vue-spa...
+
+Done. Now run:
+
+  cd vue-spa
+  npm install
+  npm run dev
+
+Web Application url pattern:
+
+1.static url
+ http://www.example.com/products.html / products.pdf
+2.dynamic web url
+ http://www.example.com/products.do /products.jsp | products.aspx | products.php
+3.Web service url - REST Api
+ http://www.example.com/api/products =>json
+4.SPA Web url
+
+
+SPA URL Patterns:
+................
+1.web url - looks like web service url
+   http://www.example.com/hello /products
+2.hash url pattern-  hash bang url pattern
+
+http://www.example.com/index.html#hello | #products
+
+................................................................................
+			 Steps for building spa
+
+1.router configuration:
+router/index.js
+
+import Home from '../components/Home.vue'
+import HelloWorld from '../components/HelloWorld.vue';
+import { createRouter, createWebHistory } from 'vue-router'
+
+
+//route configuration
+const routes = [
+    {
+        path: '/',
+        component: Home
+    },
+    {
+        path: '/hello',
+        component: HelloWorld
+    }
+]
+//create router object
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes
+})
+
+export default router;
+
+2.main.js
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+
+createApp(App)
+    .use(router)
+    .mount('#app')
+
+3.routing/index.js
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView
+    },
+    {
+      path: '/about',
+      name: 'about',
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('../views/AboutView.vue')
+    },
+    {
+      path: '/review',
+      name: 'reivew',
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('../views/ReviewVue.vue')
+    }
+  ]
+})
+
+export default router
+
+
+App.vue
+<script setup>
+import { RouterLink, RouterView } from 'vue-router'
+// import HelloWorld from './components/HelloWorld.vue'
+</script>
+
+<template>
+  <header>
+    <h1>Vue App Routing</h1>
+    <div>
+      <!-- <HelloWorld msg="You did it!" /> -->
+      <nav>
+        <ul>
+          <li>
+            <RouterLink to="/">Home</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/about">About</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/review">Review</RouterLink>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <RouterView />
+</template>
+
+<style scoped>
+h1 {
+  text-align: center;
+}
+</style>
+
+..................................................................................
+			   Dynamic routing : Dynamic Urls
+.................................................................................
+
+/users/:id  
+/users/1 
+
+route configuration
+  {
+      path: '/users/:id',
+      name: 'users',
+      component: () => import('../views/UsersView.vue')
+    }
+
+UsersView.vue
+<script setup>
+</script>
+<template>
+    <h1>User details</h1>
+</template>
+
+http://localhost:5173/users/2
+
+How to read route parameter?
+
+Inside Template:
+<script setup>
+
+</script>
+<template>
+    <h1>User details</h1>
+    {{$route.params}}
+    {{$route.params.id}} details
+</template>
+
+
+Inside script:
+import { useRoute } from 'vue-router';
+const route = useRoute()
+console.log(route.params.id)
+....................................................................................
+			 Master Details 
+
+
+Route Configuration:
+   {
+      path: '/users',
+      name: 'users',
+      component: () => import('../views/UsersView.vue')
+    },
+    {
+      path: '/details/:id',
+      name: 'details',
+      component: () => import('../views/UsersDetailsView.vue')
+    }
+
+Components:
+UserView.vue
+<script setup>
+import UserList from "../components/users/UserList.vue";
+</script>
+<template>
+    <UserList></UserList>
+</template>
+
+UserList.vue
+<script setup>
+import { reactive } from 'vue';
+
+const USERS = [
+    { id: 12, name: 'Dr. Nice' },
+    { id: 13, name: 'Bombasto' },
+    { id: 14, name: 'Celeritas' },
+    { id: 15, name: 'Magneta' },
+    { id: 16, name: 'RubberMan' },
+    { id: 17, name: 'Dynama' },
+    { id: 18, name: 'Dr. IQ' },
+    { id: 19, name: 'Magma' },
+    { id: 20, name: 'Tornado' }
+];
+const users = reactive(USERS)
+</script>
+<template>
+    <h1>User List</h1>
+    <ul>
+        <li v-for="user of users">
+            <RouterLink :to="'/details/'+ user.id">
+                <span>{{user.name}}</span>
+            </RouterLink>
+        </li>
+    </ul>
+</template>
+
+UsersDetails.vue
+<script setup>
+</script>
+<template>
+    <h1>{{$route.params.id}}</h1>
+</template>
+
+Build master details:
+ 
+Inside loop:
+  <RouterLink :to="'/details/'+ user.id">
+                <span>{{user.name}}</span>
+  </RouterLink>
+....................................................................................
+			 Named Routes
+....................................................................................
+
+Without Named routes
+
+const routes = [
+ {
+   path:'/details/:id',
+   component:UserDetails
+ }
+]
+  <RouterLink :to="'/details/'+ user.id">
+                <span>{{user.name}}</span>
+  </RouterLink>
+
+Here we have to refer the whole path, instead we can simply using names
+
+const routes = [
+ {
+   path:'/details/:id',
+   name:'details',
+   component:UserDetails
+ }
+]
+
+  <RouterLink :to="{name:'details',params:{user.id} }">
+                <span>{{user.name}}</span>
+  </RouterLink>
+eg:
+
+rout config
+  {
+      path: '/details/:id',
+      name: 'details',
+      component: () => import('../views/UsersDetailsView.vue')
+    }
+<script setup>
+import { reactive } from 'vue';
+
+const USERS = [
+    { id: 12, name: 'Dr. Nice' },
+    { id: 13, name: 'Bombasto' },
+    { id: 14, name: 'Celeritas' },
+    { id: 15, name: 'Magneta' },
+    { id: 16, name: 'RubberMan' },
+    { id: 17, name: 'Dynama' },
+    { id: 18, name: 'Dr. IQ' },
+    { id: 19, name: 'Magma' },
+    { id: 20, name: 'Tornado' }
+];
+const users = reactive(USERS)
+</script>
+<template>
+    <h1>User List</h1>
+    <ul>
+        <li v-for="user of users">
+            <!-- <RouterLink :to="'/details/'+ user.id">
+                <span>{{user.name}}</span>
+            </RouterLink> -->
+            <!-- With Named Routing -->
+            <RouterLink :to="{name:'details',params:{id:user.id} }">
+                <span>{{user.name}}</span>
+            </RouterLink>
+        </li>
+    </ul>
+</template>
+....................................................................................
+				Nested Routers
+.....................................................................................
+Building Sub menus;
+...................
+
+Movie
+
+ Sci
+ Adv
+ drama
+
+eg:
+
+Route Configuration
+{
+      path: '/movies',
+      name: 'movies',
+      component: () => import('../views/MoviesView.vue'),
+      children: [
+        {
+          path: 'action',
+          component: () => import('../views/ActionView.vue'),
+        },
+        {
+          path: 'drama',
+          component: () => import('../views/DramaView.vue'),
+        },
+        {
+          path: 'horror',
+          component: () => import('../views/HorrorView.vue'),
+        }
+      ]
+    }
+
+App.vue
+<script setup>
+import { RouterLink, RouterView } from 'vue-router'
+// import HelloWorld from './components/HelloWorld.vue'
+</script>
+
+<template>
+  <header>
+    <h1>Vue App Routing</h1>
+    <div>
+      <!-- <HelloWorld msg="You did it!" /> -->
+      <nav>
+        <ul>
+          <li>
+            <RouterLink to="/">Home</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/about">About</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/review">Review</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/users">Users</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/movies">Movies</RouterLink>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <RouterView />
+</template>
+
+<style scoped>
+h1 {
+  text-align: center;
+}
+</style>
+
+MoviesReview.vue
+<script setup>
+</script>
+<template>
+    <h1>Movie View</h1>
+    <ul>
+        <li>
+            <RouterLink to="/movies/action">
+                <span>Action</span>
+            </RouterLink>
+        </li>
+        <li>
+            <RouterLink to="/movies/drama">
+                <span>Drama</span>
+            </RouterLink>
+        </li>
+        <li>
+            <RouterLink to="/movies/horror">
+                <span>Horror</span>
+            </RouterLink>
+        </li>
+    </ul>
+    <RouterView />
+</template>
+
+
+ActionView.vue
+<script setup>
+</script>
+<template>
+    <h1>Action</h1>
+</template>
+..................................................................................
+				Programmetic Navigation
+
+Using Router Object we can navigate to Views
+
+<script setup>
+import { useRouter } from 'vue-router';
+const router = useRouter()
+const gotoReview = () => {
+    router.push('/review')
+}
+</script>
+<template>
+    <h1>Movie View</h1>
+    <ul>
+        <li>
+            <RouterLink to="/movies/action">
+                <span>Action</span>
+            </RouterLink>
+        </li>
+        <li>
+            <RouterLink to="/movies/drama">
+                <span>Drama</span>
+            </RouterLink>
+        </li>
+        <li>
+            <RouterLink to="/movies/horror">
+                <span>Horror</span>
+            </RouterLink>
+        </li>
+    </ul>
+    <RouterView />
+    <button @click="gotoReview">Review</button>
+</template>
+.....................................................................................				 Redirections
+
+  {
+      path: '/',
+      redirect: { name: 'home' }
+    },
+    {
+      path: '/home',
+      name: 'home',
+      component: HomeView
+    },
+/////////////////////////////////////////////////////////////////////////////////
+			Routing and Props
+
+const User = {
+  // make sure to add a prop named exactly like the route param
+  props: ['id'],
+  template: '<div>User {{ id }}</div>'
+}
+const routes = [{ path: '/user/:id', component: User, props: true }]
+
+.....................................................................................
+			  StateManagement lib - Pinia 
+.....................................................................................
+
+store : 
+ The store encapulates biz logic of your application.
+ 
+How to create store ?
+  There is factory function called "defineStore"
+
+defineStore('NameofTheStore',callbackfunction)
+
+callback function has three segments : {}
+//callback function returns object, you can pass object directly
+ 
+1.state declaration 
+2.mutation logic 
+3.computed properties => reading values 
+
+Inside Pina , all state variables are reactive , you dont need to use ref,reactive keywords 
+
+Pina code can be written in two styles 
+
+1.Options api style pattern .
+2.Composition api style pattern like setup attribute 
+
+Steps:
+1.write a separate file which encasulate
+  state,bizlogic
+
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
+
+export const useCounterStore = defineStore('counter', {
+  //state
+  state: () => {
+      //return inital state
+      return {
+          count: 10
+      }
+  },
+  //actions
+  actions: {
+      increment() {
+          this.count++
+      }
+  },
+  //getters (computed Properties)
+  getters: {
+      doubleIt: state => state.count * 2
+  }
+})
+
+Component Binding:
+<script setup>
+import { useCounterStore } from '../stores/counter.js'
+const counterStore = useCounterStore()
+</script>
+<template>
+    <h1>Counter App Using Pinia</h1>
+    <h3>Value : {{counterStore.count}}</h3>
+    <button @click="counterStore.increment">+</button>
+</template>
+.................................................................................
+			 Code Refactoring in Statement
+....................................................................................
+
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
+
+export const useCounterStore = defineStore('counter', {
+  //state
+  state: () => {
+      //return inital state
+      return {
+          count: 10
+      }
+  },
+  //actions
+  actions: {
+      increment() {
+          this.count++
+      }
+  },
+  //getters (computed Properties)
+  getters: {
+      doubleIt: state => state.count * 2
+  }
+})
+
+
+
+Looks like setup function:
+..........................
+
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
+
+export const useCounterStore = defineStore('counter', () => {
+  const count = ref(0)
+  const doubleCount = computed(() => count.value * 2)
+  function increment() {
+    count.value++
+  }
+
+  return { count, doubleCount, increment }
+})
+.............................................................................................
+Another example
+
+store/review.js
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
+
+export const useReviewStore = defineStore('review', () => {
+    const like = ref(0)
+    const doubleLike = computed(() => like.value * 2)
+    const onLike = () => like.value++
+    return { like, doubleLike, onLike }
+})
+
+component
+<script setup>
+import { useReviewStore } from '../stores/review.js'
+const review = useReviewStore()
+</script>
+<template>
+    <h1>Review</h1>
+    <h2>Likes {{review.like}}</h2>
+    <button @click="review.onLike">Like</button>
+</template>
+.............................................................................................
+			Ajax calls with Pina
+
+import { defineStore } from "pinia";
+
+export const todosStore = defineStore('todos', {
+    state: () => {
+        console.log('todos state is called')
+        return {
+            todos: [] //return default state
+        }
+    },
+    actions: {
+        //write here api : use async await
+        async getTodos() {
+            try {
+                const response = await fetch('https://jsonplaceholder.typicode.com/todos')
+                const todos = await response.json()
+                this.todos = todos
+                console.log(this.todos)
+            }
+            catch (err) {
+                console.log('todos error')
+            }
+        }
+    },
+    //computed methods
+    getters: {
+        todoslist: state => state.todos
+    }
+})
+
+Component:
+<script setup>
+import { onMounted } from 'vue';
+import { todosStore } from '../stores/todos.js'
+const todos = todosStore();
+
+onMounted(()=>{
+    todos.getTodos()
+})
+
+</script>
+<template>
+    <h1>Todo App with Pina</h1>
+    <div v-for="todo in todos.todoslist">
+        <h2>{{todo.id}}  {{todo.title}}</h2>
+    </div>
+</template>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
